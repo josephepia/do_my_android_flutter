@@ -1,10 +1,16 @@
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
 import 'package:do_my/Pedido/ui/screens/detalle_pedido_screen.dart';
+import 'package:do_my/Usuario/bloc/bloc_user.dart';
 import 'package:do_my/Usuario/ui/screens/login.dart';
+import 'package:do_my/widgets/historial_screen.dart';
+import 'package:do_my/widgets/home_screen.dart';
+import 'package:do_my/widgets/pedidos_screen.dart';
+import 'package:do_my/widgets/profile_menu.dart';
 import 'package:ff_navigation_bar/ff_navigation_bar.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:curved_navigation_bar/curved_navigation_bar.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 
 class NavigationBar extends StatefulWidget {
   String title = "";
@@ -20,11 +26,27 @@ class _NavigationBar extends State<NavigationBar> {
     6.0,6.0,6.0,6.0
   ];
    List<Widget> widgetsChildren = [
-    Login(),
-    Login(),
-    Login(),
-    DetallePedido(),
-    Login(),
+    BlocProvider(
+      bloc: UserBloc(),
+      child: Home(),
+    ),
+     BlocProvider(
+      bloc: UserBloc(),
+      child: Pedidos(),
+    ),
+     BlocProvider(
+       bloc: UserBloc(),
+       child: Historial(),
+     ),
+     BlocProvider(
+       bloc: UserBloc(),
+       child: ProfileMenu(),
+     ),
+
+
+
+
+
   ];
 
 
@@ -57,13 +79,19 @@ class _NavigationBar extends State<NavigationBar> {
         child: ConvexAppBar(
 
           items: [
-            TabItem(icon: Icons.home, title: 'Home',),
+            TabItem(icon: Icons.home, title: 'Inicio',),
             TabItem(icon: Icons.receipt, title: 'Pedidos'),
             TabItem(icon: Icons.timelapse, title: 'Historial'),
-            TabItem(icon: Icons.person, title: 'Profile'),
+//            TabItem(icon: Icons.person, title: 'Perfil'),
+            TabItem(icon: Icons.settings, title: 'Menú'),
           ],
-          initialActiveIndex: 2,//optional, default as 0
-          onTap: (int i) => print('click index=$i'),
+          initialActiveIndex: 0,//optional, default as 0
+          onTap: (int i){
+            setState(() {
+              print('index ${i}');
+              selectedIndex = i;
+            });
+          },
           height: 60.0,
           backgroundColor: Colors.white,
           color: Color(0xFFacb5c5),

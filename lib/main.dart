@@ -1,49 +1,60 @@
+import 'package:do_my/Pedido/bloc/bloc_pedido.dart';
 import 'package:do_my/Usuario/bloc/bloc_user.dart';
+import 'package:do_my/Usuario/ui/screens/complete_profile_driver_screen.dart';
+import 'package:do_my/Usuario/ui/screens/send_number_phone_screen.dart';
+import 'package:do_my/Usuario/ui/screens/validate_phone_number_screen.dart';
+import 'package:do_my/service_locator.dart';
 import 'package:do_my/widgets/gradiente.dart';
+import 'package:do_my/widgets/mapbox_full_screen.dart';
 import 'package:do_my/widgets/navigation_bar.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:geocoder/geocoder.dart';
 import 'package:do_my/Usuario/ui/screens/login.dart';
+import 'package:do_my/servi/servi_navigator.dart';
+
 void main() {
+//  WidgetsFlutterBinding.ensureInitialized();
+//  await Firebase.initializeApp();
+  setupLocator();
   runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   // This widget is the root of your application.
   // From a query
+  final GlobalKey<NavigatorState> navigatorKey =  GlobalKey<NavigatorState>();
+  @override
+  _MyAppState createState() => _MyAppState();
+}
 
+class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-//    SystemUiOverlayStyle(
-//      statusBarColor: Colors.transparent
-//    );
-
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
         statusBarColor: Colors.transparent
     ));
     return BlocProvider(
-      child: MaterialApp (
-          title: 'Flutter Demo',
-          theme: ThemeData(
-            // This is the theme of your application.
-            //
-            // Try running your application with "flutter run". You'll see the
-            // application has a blue toolbar. Then, without quitting the app, try
-            // changing the primarySwatch below to Colors.green and then invoke
-            // "hot reload" (press "r" in the console where you ran "flutter run",
-            // or simply save your changes to "hot reload" in a Flutter IDE).
-            // Notice that the counter didn't reset back to zero; the application
-            // is not restarted.
-            primarySwatch: Colors.blue,
-            // This makes the visual density adapt to the platform that you run
-            // the app on. For desktop platforms, the controls will be smaller and
-            // closer together (more dense) than on mobile platforms.
-            visualDensity: VisualDensity.adaptivePlatformDensity,
-          ),
-          home: NavigationBar()
+      child: BlocProvider(
+        child: MaterialApp (
+          navigatorKey: locator<NavigationService>().navigatorKey,
+            title: 'Do-my',
+            theme: ThemeData(
+              primarySwatch: Colors.blue,
+            ),
+//            home: Login()
+
+            routes: {
+              '/': (BuildContext context)=> Login(),
+              '/phoneLogin': (BuildContext context)=> SendNumberPhone(),
+              '/codePhoneValidate': (BuildContext context)=> ValidatePhoneNumber(),
+              '/completeProfileDriver': (BuildContext context)=> CompleteProfileDriver()
+        },
 //      home: MyHomePage(title: 'Flutter Demo Home Page'),
+        ),
+        bloc: PedidoBloc(),
       ),
       bloc: UserBloc(),
 

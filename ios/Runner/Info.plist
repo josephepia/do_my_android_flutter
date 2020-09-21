@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>MGLMapboxAccessToken</key>
+    <string>pk.eyJ1Ijoiam9zZXBoZXBpYSIsImEiOiJja2Vha2F3N3QwMWRwMzBwYjh3ZDllczQ4In0.Ygj_AikKyCebs2N51vcMHQ</string>
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Do-my necesita saber tu ubicación</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -51,7 +57,7 @@
     		<array>
     			<!-- TODO Replace this value: -->
     			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-    			<string>om.googleusercontent.apps.343289366002-7oju4q03bas35kcek0jvrkvahsihe0ej</string>
+    			<string>com.googleusercontent.apps.343289366002-7oju4q03bas35kcek0jvrkvahsihe0ej</string>
     		</array>
     	</dict>
     </array>
