@@ -1,12 +1,16 @@
 import 'package:do_my/Pedido/bloc/bloc_pedido.dart';
+import 'package:do_my/Pedido/ui/screens/create_new_pedido_screen.dart';
 import 'package:do_my/Usuario/bloc/bloc_user.dart';
 import 'package:do_my/Usuario/ui/screens/complete_profile_driver_screen.dart';
 import 'package:do_my/Usuario/ui/screens/send_number_phone_screen.dart';
 import 'package:do_my/Usuario/ui/screens/validate_phone_number_screen.dart';
 import 'package:do_my/service_locator.dart';
 import 'package:do_my/widgets/gradiente.dart';
+import 'package:do_my/widgets/handler_screen.dart';
 import 'package:do_my/widgets/mapbox_full_screen.dart';
 import 'package:do_my/widgets/navigation_bar.dart';
+import 'package:do_my/widgets/profile_Screen.dart';
+import 'package:do_my/widgets/upload_identifiacion.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -45,12 +49,16 @@ class _MyAppState extends State<MyApp> {
               primarySwatch: Colors.blue,
             ),
 //            home: Login()
-
+            initialRoute: 'handler',
             routes: {
-              '/': (BuildContext context)=> Login(),
-              '/phoneLogin': (BuildContext context)=> SendNumberPhone(),
-              '/codePhoneValidate': (BuildContext context)=> ValidatePhoneNumber(),
-              '/completeProfileDriver': (BuildContext context)=> CompleteProfileDriver()
+              'login': (BuildContext context)=> Login(),
+              'handler': (BuildContext context)=> Handler(),
+              'phoneLogin': (BuildContext context)=> SendNumberPhone(),
+              'codePhoneValidate': (BuildContext context)=> ValidatePhoneNumber(),
+              'completeProfileDriver': (BuildContext context)=> CompleteProfileDriver(),
+              'createPedido': (BuildContext context)=> CreateNewPedido(),
+              'profile': (BuildContext context)=> Profile(),
+              'uploadIdentificacion': (BuildContext context)=> UploadIdentificacion(),
         },
 //      home: MyHomePage(title: 'Flutter Demo Home Page'),
         ),

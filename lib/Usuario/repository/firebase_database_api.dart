@@ -119,8 +119,9 @@ class FirebaseDatabaseAPI {
   Future updateUser({User user, bool checkConductor}) async{
 //    Map<String, dynamic>  userData = user;
     bool profileMinComplete = false;
-    if(user.nombre.isNotEmpty && user.telefono.isNotEmpty ){
+    if(user.nombre !=null && user.telefono !=null ){
       profileMinComplete = true;
+      user.minDataClient = true;
     }
 
 //    if(user.rol == "conductor"){
@@ -132,22 +133,55 @@ class FirebaseDatabaseAPI {
 //    Marca Vehiculo
 //    Color Vehiculo
 
+     Map<String, dynamic>  userData = Map<String, dynamic>();
 
-    return await userRef.child(user.uid).update({
-      "uid": user.uid,
-      "nombre": user.nombre,
-      "correo": user.correo,
-      "photoUrl": user.photoUrl,
-      'dateUpdate': ServerValue.timestamp,
-      'lastLogin': ServerValue.timestamp,
-      'telefono': user.telefono,
-      "profileMinDataComplete": profileMinComplete,
+    user.toJson().forEach((k,v) {
+    print("key $k valor $v");
+      if(v!= null){
+        userData[k] = v;
+      }
 
-    }).then((_){
+    });
+
+    userData['dateUpdate'] = ServerValue.timestamp;
+    userData["profileMinDataComplete"]= profileMinComplete;
+
+    return await userRef.child(user.uid).update(userData).then((_){
       print("usuario actualizado correctamente}");
     }).catchError((onError){
       print("ocurrio un error al actualizar el usuario ${onError}");
     });
+
+//    return await userRef.child(user.uid).update({
+//      "uid": user.uid,
+//      "nombre": user.nombre,
+//      "correo": user.correo,
+//      "photoUrl": user.photoUrl,
+//      'dateUpdate': ServerValue.timestamp,
+//      'lastLogin': ServerValue.timestamp,
+//      'telefono': user.telefono,
+//      "profileMinDataComplete": profileMinComplete,
+//      "tipoVehiculo": user.tipoVehiculo,
+//      "colorVehiculo": user.colorVehiculo,
+//      "marcaVehiculo": user.marcaVehiculo,
+//      "matriculaVehiculo": user.matriculaVehiculo,
+//      "tipoVehiculo": user.tipoVehiculo,
+//      "licenciaTransitoUrlB": user.licenciaTransitoUrlB,
+//      "licenciaTransitoUrlA": user.licenciaTransitoUrlA,
+//      "licenciaConducirUrlB": user.licenciaConducirUrlB,
+//      "licenciaConducirUrlA": user.licenciaConducirUrlA,
+//      "identificacionUrlA": user.identificacionUrlA,
+//      "identificacionUrlB": user.identificacionUrlB,
+//      "photoUrlCar": user.photoUrlCar,
+//      "SOATUrlA": user.SOATUrlA,
+//      "SOATUrlB": user.SOATUrlB,
+//
+//
+//    }).then((_){
+//      print("usuario actualizado correctamente}");
+//    }).catchError((onError){
+//      print("ocurrio un error al actualizar el usuario ${onError}");
+//    });
   }
 
   lastLoginUser(User user){

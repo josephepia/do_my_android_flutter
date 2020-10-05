@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
 
 class Servicio {
-  final String nombre;
-  final String descripcion;
-  final String imagenUrl;
+   String nombre;
+   String descripcion;
+   String imagenUrl;
 
-  Servicio({Key key, @required this.nombre,@required this.descripcion, @required this.imagenUrl});
+   String id;
+   String categoriaId;
+   String nombreCategoria;
+
+  Servicio({Key key, @required this.nombre,@required this.descripcion, @required this.imagenUrl,this.id,this.categoriaId,this.nombreCategoria});
 
 }

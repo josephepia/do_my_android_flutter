@@ -1,5 +1,6 @@
 
 import 'package:do_my/Pedido/repository/firebase_database_api.dart';
+import 'package:do_my/Pedido/ui/widgets/card_servicio_widget.dart';
 import 'package:do_my/Usuario/model/user.dart';
 import 'package:do_my/widgets/home_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -12,6 +13,6 @@ class FirebaseDatabaseRepository {
 //  updateUserFirebase(User user) => _firebaseAPI.updateUser(user);
 //  saveUserFirebase(User user) => _firebaseAPI.saveUser(user);
 
-  List<Servicio> buildServicios(DataSnapshot dataSnapshot) => _firebaseAPI.buildServicios(dataSnapshot);
+  List<CardServicio> buildServicios(DataSnapshot dataSnapshot) => _firebaseAPI.buildServicios(dataSnapshot);
   FirebaseAnimatedList sortListServicios(ScrollController scrollController) => _firebaseAPI.sortListServicios(scrollController);
 }

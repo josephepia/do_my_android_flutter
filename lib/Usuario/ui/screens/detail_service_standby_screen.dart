@@ -29,11 +29,11 @@ class DetailServiceStandby extends StatelessWidget {
       body: Stack(
         children: [
           MapCreatePedido(
-            destino: "valledupar",
-            origen: "Valledupar",
-            destinoLocation: LatLng(pedido.destinoLat, pedido.destinoLong),
-            origenLocation: LatLng(pedido.origenLat, pedido.origenLong),
-            userLocation: LatLng(10.461439, -73.253489),
+//            destino: "valledupar",
+//            origen: "Valledupar",
+//            destinoLocation: LatLng(pedido.destinoLat, pedido.destinoLong),
+//            origenLocation: LatLng(pedido.origenLat, pedido.origenLong),
+//            userLocation: LatLng(10.461439, -73.253489),
           ),
           DraggableScrollableSheet(
             initialChildSize: 0.3,

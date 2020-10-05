@@ -51,7 +51,7 @@ dependencies:
   #plugin para la geolocalizacion
   location: ^3.0.2
   #libreria para la geolocalizacion
-  geolocator: ^5.3.2+2
+  geolocator: ^6.0.0+4
   #libreria para snapShot firebase
 #  firebase_dart: ^0.7.15+4
   #plugin para el icono de la app
@@ -63,7 +63,17 @@ dependencies:
   #para navegar en rutas sin contexto
   get_it: ^5.0.0
   #plugin para picker photo
-  image_picker: ^0.6.7+8
+  image_picker: ^0.6.7+11
+  #toogle buutons group
+  flutter_toggle_tab: ^0.0.3+2
+  #plugin para geolocation en segundo plano
+  background_locator: ^1.2.2+1
+  #plugin para input search location
+#  address_search_field: ^1.4.2
+  #mapbox search
+  mapbox_search: ^2.0.1
+  #check redondos
+  roundcheckbox: ^1.0.0+1
 
 
 dev_dependencies:

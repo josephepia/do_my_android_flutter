@@ -2,13 +2,17 @@ import 'package:flutter/material.dart';
 
 class Pedido {
 
-  final String id;
+   String id;
    String origen;   //origen en texto
    String destino;  //destino en texto
    String descripcion;
    double precio;
    String estado;   //deberia ser final
-  final String clienteUid;
+   String clienteUid;
+  String servicioId;
+  String nombreServicio;
+  String nombreCategoria;
+  String categoriaId;
    String socioUid;
    double origenLat;   //deberia ser final
    double origenLong;  //deberia ser final
@@ -28,6 +32,10 @@ class Pedido {
     this.origenLat,
     this.origenLong,
     this.destinoLat,
-    this.destinoLong
+    this.destinoLong,
+    this.categoriaId,
+    this.servicioId,
+    this.nombreCategoria,
+    this.nombreServicio
   });
 }

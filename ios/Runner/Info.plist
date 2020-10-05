@@ -2,12 +2,13 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>io.flutter.embedded_views_preview</key>
-    <true/>
-    <key>MGLMapboxAccessToken</key>
-    <string>pk.eyJ1Ijoiam9zZXBoZXBpYSIsImEiOiJja2Vha2F3N3QwMWRwMzBwYjh3ZDllczQ4In0.Ygj_AikKyCebs2N51vcMHQ</string>
-    <key>NSLocationWhenInUseUsageDescription</key>
-    <string>Do-my necesita saber tu ubicación</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Do-my necesita acceso a la camara</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Do-my necesita acceso a la camara</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Do-my necesita acceso al microfono</string>
+
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleExecutable</key>
@@ -24,10 +25,33 @@
 	<string>$(FLUTTER_BUILD_NAME)</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.343289366002-7oju4q03bas35kcek0jvrkvahsihe0ej</string>
+			</array>
+		</dict>
+	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>MGLMapboxAccessToken</key>
+	<string>pk.eyJ1Ijoiam9zZXBoZXBpYSIsImEiOiJja2Vha2F3N3QwMWRwMzBwYjh3ZDllczQ4In0.Ygj_AikKyCebs2N51vcMHQ</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>Do-my necesita saber tu ubicación</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Do-my necesita saber tu ubicación</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Do-my necesita saber tu ubicación</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>location</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -47,20 +71,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
-	<!-- Google Sign-in Section -->
-    <key>CFBundleURLTypes</key>
-    <array>
-    	<dict>
-    		<key>CFBundleTypeRole</key>
-    		<string>Editor</string>
-    		<key>CFBundleURLSchemes</key>
-    		<array>
-    			<!-- TODO Replace this value: -->
-    			<!-- Copied from GoogleService-Info.plist key REVERSED_CLIENT_ID -->
-    			<string>com.googleusercontent.apps.343289366002-7oju4q03bas35kcek0jvrkvahsihe0ej</string>
-    		</array>
-    	</dict>
-    </array>
-    <!-- End of the Google Sign-in Section -->
+	<key>io.flutter.embedded_views_preview</key>
+	<true/>
 </dict>
 </plist>

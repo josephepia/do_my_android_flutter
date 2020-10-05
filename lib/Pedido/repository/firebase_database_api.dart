@@ -3,6 +3,7 @@
 import 'dart:collection';
 
 import 'package:do_my/Pedido/model/servicio.dart' as model;
+import 'package:do_my/Pedido/ui/widgets/card_servicio_widget.dart';
 import 'package:do_my/Usuario/model/user.dart';
 import 'package:do_my/widgets/home_screen.dart';
 import 'package:firebase_database/firebase_database.dart';
@@ -32,11 +33,12 @@ class FirebaseDatabaseAPI {
           Map servicios = snapshot.value;
 
 //          Servicio(titulo: ,)
-          return Servicio(
-            descripcion: servicios['descripcion'] ,
-            imagen: servicios['imagenUrl'],
-            titulo: servicios['nombre'],
-          );
+//          return Servicio(
+//            descripcion: servicios['descripcion'] ,
+//            imagen: servicios['imagenUrl'],
+//            titulo: servicios['nombre'],
+//          );
+        return null;
 
         },
 
@@ -44,12 +46,14 @@ class FirebaseDatabaseAPI {
   }
 
 
-  List<Servicio> buildServicios(DataSnapshot dataSnapshot){
+
+
+  List<CardServicio> buildServicios(DataSnapshot dataSnapshot){
 
     print("lo que llega de firebase ");
     print(dataSnapshot.value.toString());
     print("-------------------------");
-    List<Servicio> servicios = List<Servicio>();
+    List<CardServicio> servicios = List<CardServicio>();
 
     LinkedHashMap<dynamic,dynamic>  values2 = dataSnapshot.value;
     Map<dynamic,dynamic> values = dataSnapshot.value;

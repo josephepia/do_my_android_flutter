@@ -30,11 +30,12 @@ class _Login extends State<Login>{
   @override
   Widget build(BuildContext context) {
     phonController = TextEditingController();
-    userBloc = BlocProvider.of(context);
-    return _handleCurrentSession();
+    userBloc = BlocProvider.of<UserBloc>(context);
+    return _handleCurrentSession(context,userBloc);
   }
 
-  Widget _handleCurrentSession(){
+  Widget _handleCurrentSession(BuildContext context, UserBloc userBloc){
+
     return StreamBuilder(
       stream: userBloc.authStatus,
       builder: (BuildContext context, AsyncSnapshot<FirebaseUser> snapshotOne)  {
@@ -118,7 +119,7 @@ class LoginContent extends StatelessWidget {
   UserBloc userBloc;
   @override
   Widget build(BuildContext context) {
-    userBloc  = BlocProvider.of(context);
+    userBloc  = BlocProvider.of<UserBloc>(context);
     return Scaffold(
 
       body: Stack(

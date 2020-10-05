@@ -178,12 +178,14 @@ class _CompleteProfileOneState extends State<CompleteProfileOne> {
                         print("datos del usuario");
                         print(widget.user.telefono);
                         print(widget.user.nombre);
-
+                        if(checkConductor){
+                          widget.user.rol = "conductor";
+                        }
 
 
                         userBloc.updateUser(user: widget.user, checkConductor: checkConductor).then((value){
                           if(checkConductor){
-                            locator<NavigationService>().navigateTo(routeName: '/completeProfileDriver', arguments: widget.user);
+                            locator<NavigationService>().navigateTo(routeName: 'completeProfileDriver', arguments: widget.user);
 //                            navigatorKey.currentState.pushNamed('/completeProfileDriver', arguments: widget.user);
                           }
                         });

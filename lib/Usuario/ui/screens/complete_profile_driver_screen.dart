@@ -1,8 +1,12 @@
 import 'dart:io';
 
+import 'package:do_my/Usuario/bloc/bloc_user.dart';
 import 'package:do_my/Usuario/model/user.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CompleteProfileDriver extends StatefulWidget {
@@ -11,484 +15,1331 @@ class CompleteProfileDriver extends StatefulWidget {
 }
 
 class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
-  TextEditingController inputIdentificacion;
-  TextEditingController inputMatrcula;
-  TextEditingController inputColorVehiculo;
-  TextEditingController inputMarcaVehiculo;
-  final piker = ImagePicker();
+  TextEditingController inputIdentificacion = TextEditingController();
+  TextEditingController inputMatrcula= TextEditingController();
+  TextEditingController inputColorVehiculo= TextEditingController();
+  TextEditingController inputMarcaVehiculo= TextEditingController();
+//  final piker = ImagePicker();
   Color colorPrimary = Color.fromRGBO(9, 46, 135, 1.0);
+
+  GlobalKey formKey = GlobalKey<FormState>();
+  User user;
+  File imagenPerfil;
+  UserBloc userBloc;
   @override
   Widget build(BuildContext context) {
-    final User user = ModalRoute.of(context).settings.arguments;
+    userBloc = BlocProvider.of<UserBloc>(context);
+    user = ModalRoute.of(context).settings.arguments;
     print("iniciando completar perfil");
     print('datos del usuario que llega por parametro');
     print(user.nombre);
+    print("uid -> ");
+    print(user.uid);
     print(user.telefono);
     print(user.photoUrl);
+    inputIdentificacion.text = user.identificacion ?? "";
+    inputMatrcula.text = user.matriculaVehiculo ?? "";
+    inputMarcaVehiculo.text = user.marcaVehiculo ?? "";
+
     return Scaffold(
       body: Container(
         child: ListView(
           children: [
               Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Form(
+                      key: formKey,
+                      child: StreamBuilder<Object>(
+                        stream: userBloc.myProfileDataOnline(user.uid),
+                        builder: (context, AsyncSnapshot snapshot2) {
 
-                      child: Column(
-                        children: [
-                          Container(
-                            width: 100.0,
-                            height: 100.0,
+                          switch(snapshot2.connectionState) {
+                            case ConnectionState.waiting:
+                              return Center(child: CircularProgressIndicator());
 
-                            margin: EdgeInsets.all(15.0),
-                            decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    image: NetworkImage(user.photoUrl),
-                                    fit: BoxFit.cover
-                                )
-                            ),
-                            child: Stack(
-                              alignment: Alignment.bottomRight,
-                              children: [
-                                FloatingActionButton(onPressed: (){
-                                  File file;
+                              break;
+                            case ConnectionState.none:
+                              return Center(child: CircularProgressIndicator());
 
-                                  piker.getImage(source: ImageSource.camera).then((value){
-                                    print("foto tomada");
-                                    print("datos de la foto");
-                                    print(value.toString());
-                                    print("-------");
-                                    print(value.path);
-                                  });
+                              break;
+                            case ConnectionState.active:
+                              return Column(
+                                children: [
+                                  Container(
+                                    width: 100.0,
+                                    height: 100.0,
+
+                                    margin: EdgeInsets.all(15.0),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: NetworkImage(snapshot2.data.snapshot.value["photoUrl"]),
+                                            fit: BoxFit.cover
+                                        )
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.bottomRight,
+                                      children: [
+                                        IconButton(onPressed: () async {
+
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
 
 
-                                },
-                                  mini: true,
-                                  backgroundColor: Color.fromRGBO(9, 46, 135, 1.0),
 
-                                  child: IconButton(
-                                  icon: Icon(Icons.photo_camera, color: Colors.white,),
-                                ),
-                                )
-                              ],
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
-                          TextFormField(
-                            controller: inputIdentificacion,
-                            maxLines: 1,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              WhitelistingTextInputFormatter.digitsOnly
-                            ],
-                            onSaved: (value){
-                              user.identificacion = value;
-                            },
-                            validator: (value) {
-                              if (value.isEmpty || value == "") {
-                                return 'Este campo es obligatorio';
-                              }
-                              return null;
-                            },
-                            style: TextStyle(
-                                fontFamily: "Poppins"
-                            ),
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
 
-                            decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color(0xffF6F6F6),
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/perfil.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.photoUrl = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+
+
+//                                  _seleccionarImagen(ImageSource.gallery);
+
+//                                  piker.getImage(source: ImageSource.camera).then((value){
+//                                    print("foto tomada");
+//                                    print("datos de la foto");
+//                                    print(value.toString());
+//                                    print("-------");
+//                                    print(value.path);
+//                                  });
+
+
+                                        },
+                                          color: Color.fromRGBO(9, 46, 135, 1.0),
+//                                  mini: true,
+
+
+
+                                          icon: Icon(Icons.photo_camera, color: Colors.white,),
+
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  TextFormField(
+                                    controller: inputIdentificacion,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      WhitelistingTextInputFormatter.digitsOnly
+                                    ],
+                                    onSaved: (value){
+                                      user.identificacion = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
 //                labelText: "numero telefonico",
-                                labelStyle:
-                                TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
-                                border: InputBorder.none,
-                                hintText: "Identificación",
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          TextFormField(
-                            controller: inputMatrcula,
-                            maxLines: 1,
-                            keyboardType: TextInputType.text,
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "Identificación",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputMatrcula,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
 //                          inputFormatters: [
 //                            FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
 //                          ],
-                            onSaved: (value){
-                              user.matriculaVehiculo = value;
-                            },
-                            validator: (value) {
-                              if (value.isEmpty || value == "") {
-                                return 'Este campo es obligatorio';
-                              }
-                              return null;
-                            },
-                            style: TextStyle(
-                                fontFamily: "Poppins"
-                            ),
+                                    onSaved: (value){
+                                      user.matriculaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
 
-                            decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color(0xffF6F6F6),
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
 //                labelText: "numero telefonico",
-                                labelStyle:
-                                TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
-                                border: InputBorder.none,
-                                hintText: "No matricula vehículo",
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          TextFormField(
-                            controller: inputMarcaVehiculo,
-                            maxLines: 1,
-                            keyboardType: TextInputType.text,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
-                            ],
-                            onSaved: (value){
-                              user.marcaVehiculo = value;
-                            },
-                            validator: (value) {
-                              if (value.isEmpty || value == "") {
-                                return 'Este campo es obligatorio';
-                              }
-                              return null;
-                            },
-                            style: TextStyle(
-                                fontFamily: "Poppins"
-                            ),
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "No matricula vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputMarcaVehiculo,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+                                    ],
+                                    onSaved: (value){
+                                      user.marcaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
 
-                            decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color(0xffF6F6F6),
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
 //                labelText: "numero telefonico",
-                                labelStyle:
-                                TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
-                                border: InputBorder.none,
-                                hintText: "Marca vehículo",
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          TextFormField(
-                            controller: inputColorVehiculo,
-                            maxLines: 1,
-                            keyboardType: TextInputType.text,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
-                            ],
-                            onSaved: (value){
-                              user.marcaVehiculo = value;
-                            },
-                            validator: (value) {
-                              if (value.isEmpty || value == "") {
-                                return 'Este campo es obligatorio';
-                              }
-                              return null;
-                            },
-                            style: TextStyle(
-                                fontFamily: "Poppins"
-                            ),
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "Marca vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputColorVehiculo,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+                                    ],
+                                    onSaved: (value){
+                                      user.marcaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
 
-                            decoration: InputDecoration(
-                                filled: true,
-                                fillColor: Color(0xffF6F6F6),
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
 //                labelText: "numero telefonico",
-                                labelStyle:
-                                TextStyle(color: colorPrimary),
-                                border: InputBorder.none,
-                                hintText: "Color vehículo",
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(color: Color(0xffF6F6F6)),
-                                  borderRadius: BorderRadius.circular(10),
-                                )),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Soportes",
-                            style: TextStyle(
-                              fontFamily: "Poppins",
-                              fontSize: 20.0,
-                              fontWeight: FontWeight.bold,
-                              color: colorPrimary
-                            ),
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Identificación",
-                            style: TextStyle(
-                              fontFamily: "Poppins"
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
+                                        labelStyle:
+                                        TextStyle(color: colorPrimary),
+                                        border: InputBorder.none,
+                                        hintText: "Color vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Soportes",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorPrimary
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Identificación",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
 
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: (){
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
 
-                                },
-                                child: Ink(
-                                  height: 100.0,
+                                          final _picker = ImagePicker();
 
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 20.0
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("documentos/${userTemp.uid}/identifiacionA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.identificacionUrlA = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                            image: user.identificacionUrlA == null ?  null : DecorationImage(
+                                              image: NetworkImage(user.identificacionUrlA),
+                                              fit: BoxFit.cover
+                                            )
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/identifiacionB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.identificacionUrlB = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.identificacionUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.identificacionUrlB),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
                                       )
-                                    ]
+                                    ],
                                   ),
-                                ),
-                              ),
-                              Spacer(),
-                              InkWell(
-                                onTap: (){
-
-                                },
-                                child: Ink(
-                                  height: 100.0,
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 20.0
-                                        )
-                                      ]
+                                  SizedBox(
+                                    height: 10.0,
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Licencia de tránsito",
-                            style: TextStyle(
-                              fontFamily: "Poppins"
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
+                                  Text(
+                                    "Licencia de tránsito",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
 
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: (){
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                      var userTemp = await userBloc.currentUser;
 
-                                },
-                                child: Ink(
-                                  height: 100.0,
+                                      final _picker = ImagePicker();
 
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 20.0
+                                      final pickedFile = await _picker.getImage(
+                                      source: ImageSource.gallery,
+                                      );
+
+
+
+                                      if(pickedFile != null){
+                                      imagenPerfil = File(pickedFile.path);
+                                      }
+
+                                      print("foto seleccionada");
+
+                                      var exten= imagenPerfil.path.split(".").last;
+
+                                      userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaTransitoA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                      storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                      snapchot.ref.getDownloadURL().then((urlImage){
+                                      user.licenciaTransitoUrlA = urlImage;
+                                      userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                      });
+                                      });
+                                      }).catchError((onError){
+                                      print("error al subir iamgen ${onError.toString()}");
+                                      });
+                                      },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.licenciaTransitoUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.licenciaTransitoUrlA),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaTransitoB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.licenciaTransitoUrlB = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.licenciaTransitoUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.licenciaTransitoUrlB),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
                                       )
-                                    ]
+                                    ],
                                   ),
-                                ),
-                              ),
-                              Spacer(),
-                              InkWell(
-                                onTap: (){
-
-                                },
-                                child: Ink(
-                                  height: 100.0,
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 20.0
-                                        )
-                                      ]
+                                  SizedBox(
+                                    height: 10.0,
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Foto de su vehículo",
-                            style: TextStyle(
-                              fontFamily: "Poppins"
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
+                                  Text(
+                                    "Foto de su vehículo",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
 
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                onTap: (){
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
 
-                                },
-                                child: Ink(
-                                  height: 100.0,
+                                          final _picker = ImagePicker();
 
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 20.0
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/vehiculo.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.photoUrlCar = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.photoUrlCar == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.photoUrlCar),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
+                                      ),
+
+
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Licencia de conducir",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.licenciaConducirUrlA = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.licenciaConducirUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.licenciaConducirUrlA),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.licenciaConducirUrlB = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.licenciaConducirUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.licenciaConducirUrlB),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
                                       )
-                                    ]
+                                    ],
                                   ),
-                                ),
-                              ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "SOAT",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: () async {
+                                          var userTemp = await userBloc.currentUser;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
 
 
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "Licencia de conducir",
-                            style: TextStyle(
-                              fontFamily: "Poppins"
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
 
-                          Row(
-                            children: [
-                              InkWell(
-                                onTap: (){
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
 
-                                },
-                                child: Ink(
-                                  height: 100.0,
+                                          print("foto seleccionada");
 
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(10.0),
-                                    color: Colors.white,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black12,
-                                        blurRadius: 20.0
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/soat.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                user.SOATUrlA = urlImage;
+                                                userBloc.updateUser(user: user);
+
+//                                                setState(() {
+//
+//                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ],
+                                              image: user.SOATUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(user.SOATUrlA),
+                                                  fit: BoxFit.cover
+                                              )
+                                          ),
+                                        ),
+                                      ),
+
+
+                                    ],
+                                  ),
+
+
+                                ],
+                              );
+                              break;
+                            case ConnectionState.done:
+                              return Column(
+                                children: [
+                                  Container(
+                                    width: 100.0,
+                                    height: 100.0,
+
+                                    margin: EdgeInsets.all(15.0),
+                                    decoration: BoxDecoration(
+                                        shape: BoxShape.circle,
+                                        image: DecorationImage(
+                                            image: NetworkImage(user.photoUrl),
+                                            fit: BoxFit.cover
+                                        )
+                                    ),
+                                    child: Stack(
+                                      alignment: Alignment.bottomRight,
+                                      children: [
+                                        IconButton(onPressed: () async {
+
+                                          var userTemp = await userBloc.currentUser;
+//                                  File file;
+
+                                          final _picker = ImagePicker();
+
+                                          final pickedFile = await _picker.getImage(
+                                            source: ImageSource.gallery,
+                                          );
+
+
+
+                                          if(pickedFile != null){
+                                            imagenPerfil = File(pickedFile.path);
+                                          }
+
+                                          print("foto seleccionada");
+
+                                          var exten= imagenPerfil.path.split(".").last;
+
+                                          userBloc.uploadFile("imagenes/${userTemp.uid}/perfil.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
+                                            storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
+                                              snapchot.ref.getDownloadURL().then((urlImage){
+                                                userBloc.updateUser(user: User(
+                                                    uid: userTemp.uid,
+                                                    photoUrl: urlImage
+                                                ));
+
+                                                setState(() {
+
+                                                });
+                                              });
+                                            });
+                                          }).catchError((onError){
+                                            print("error al subir iamgen ${onError.toString()}");
+                                          });
+
+
+//                                  _seleccionarImagen(ImageSource.gallery);
+
+//                                  piker.getImage(source: ImageSource.camera).then((value){
+//                                    print("foto tomada");
+//                                    print("datos de la foto");
+//                                    print(value.toString());
+//                                    print("-------");
+//                                    print(value.path);
+//                                  });
+
+
+                                        },
+                                          color: Color.fromRGBO(9, 46, 135, 1.0),
+//                                  mini: true,
+
+
+
+                                          icon: Icon(Icons.photo_camera, color: Colors.white,),
+
+                                        )
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+                                  TextFormField(
+                                    controller: inputIdentificacion,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      WhitelistingTextInputFormatter.digitsOnly
+                                    ],
+                                    onSaved: (value){
+                                      user.identificacion = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
+//                labelText: "numero telefonico",
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "Identificación",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputMatrcula,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
+//                          inputFormatters: [
+//                            FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+//                          ],
+                                    onSaved: (value){
+                                      user.matriculaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
+//                labelText: "numero telefonico",
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "No matricula vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputMarcaVehiculo,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+                                    ],
+                                    onSaved: (value){
+                                      user.marcaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
+//                labelText: "numero telefonico",
+                                        labelStyle:
+                                        TextStyle(color: Color.fromRGBO(9, 46, 135, 1.0)),
+                                        border: InputBorder.none,
+                                        hintText: "Marca vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  TextFormField(
+                                    controller: inputColorVehiculo,
+                                    maxLines: 1,
+                                    keyboardType: TextInputType.text,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
+                                    ],
+                                    onSaved: (value){
+                                      user.marcaVehiculo = value;
+                                    },
+                                    validator: (value) {
+                                      if (value.isEmpty || value == "") {
+                                        return 'Este campo es obligatorio';
+                                      }
+                                      return null;
+                                    },
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+
+                                    decoration: InputDecoration(
+                                        filled: true,
+                                        fillColor: Color(0xffF6F6F6),
+//                labelText: "numero telefonico",
+                                        labelStyle:
+                                        TextStyle(color: colorPrimary),
+                                        border: InputBorder.none,
+                                        hintText: "Color vehículo",
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(color: Color(0xffF6F6F6)),
+                                          borderRadius: BorderRadius.circular(10),
+                                        )),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Soportes",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins",
+                                        fontSize: 20.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: colorPrimary
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Identificación",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
                                       )
-                                    ]
+                                    ],
                                   ),
-                                ),
-                              ),
-                              Spacer(),
-                              InkWell(
-                                onTap: (){
-
-                                },
-                                child: Ink(
-                                  height: 100.0,
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 20.0
-                                        )
-                                      ]
+                                  SizedBox(
+                                    height: 10.0,
                                   ),
-                                ),
-                              )
-                            ],
-                          ),
-                          SizedBox(
-                            height: 10.0,
-                          ),
-                          Text(
-                            "SOAT",
-                            style: TextStyle(
-                              fontFamily: "Poppins"
-                            ),
-                          ),
-                          SizedBox(height: 10.0,),
-
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              InkWell(
-                                onTap: (){
-
-                                },
-                                child: Ink(
-                                  height: 100.0,
-
-                                  width: MediaQuery.of(context).size.width/2.5,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(10.0),
-                                      color: Colors.white,
-                                      boxShadow: [
-                                        BoxShadow(
-                                            color: Colors.black12,
-                                            blurRadius: 20.0
-                                        )
-                                      ]
+                                  Text(
+                                    "Licencia de tránsito",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
                                   ),
-                                ),
-                              ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Foto de su vehículo",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      ),
 
 
-                            ],
-                          ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "Licencia de conducir",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    children: [
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      ),
+                                      Spacer(),
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 10.0,
+                                  ),
+                                  Text(
+                                    "SOAT",
+                                    style: TextStyle(
+                                        fontFamily: "Poppins"
+                                    ),
+                                  ),
+                                  SizedBox(height: 10.0,),
+
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      InkWell(
+                                        onTap: (){
+
+                                        },
+                                        child: Ink(
+                                          height: 100.0,
+
+                                          width: MediaQuery.of(context).size.width/2.5,
+                                          decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(10.0),
+                                              color: Colors.white,
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.black12,
+                                                    blurRadius: 20.0
+                                                )
+                                              ]
+                                          ),
+                                        ),
+                                      ),
 
 
-                        ],
+                                    ],
+                                  ),
+
+
+                                ],
+                              );
+                              break;
+                            default:
+                              return null;
+                          }
+
+
+                        }
                       ),
                     ),
                   )
@@ -498,5 +1349,30 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
         ),
       )
     );
+  }
+
+  _seleccionarImagen(ImageSource origin, UserBloc userBloc) async {
+    final _picker = ImagePicker();
+
+    final pickedFile = await _picker.getImage(
+      source: origin,
+    );
+
+
+
+    if(pickedFile != null){
+      imagenPerfil = File(pickedFile.path);
+    }
+
+    print("foto seleccionada");
+
+    setState(() {
+
+
+    });
+  }
+
+  _guardarImagen(){
+
   }
 }

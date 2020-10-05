@@ -6,7 +6,7 @@ class LogoMiniOne extends StatelessWidget {
     return Container(
       margin: EdgeInsets.all(16.0),
       height: 40.0,
-      child: Image.asset("images/logoPromario.png"),
+      child: Image.asset("images/logoPrimario.png"),
     );
   }
 }
