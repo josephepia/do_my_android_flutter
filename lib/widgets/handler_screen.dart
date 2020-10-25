@@ -3,8 +3,9 @@ import 'dart:developer';
 
 import 'package:do_my/Usuario/model/user.dart';
 import 'package:do_my/Usuario/ui/screens/complete_profile_driver_screen.dart';
-import 'package:do_my/Usuario/ui/screens/complete_profile_one_screen.dart';
+import 'package:do_my/Usuario/ui/screens/complete_profile_client_screen.dart';
 import 'package:do_my/Usuario/ui/screens/login.dart';
+import 'package:do_my/Usuario/ui/screens/page_view_data_driver_screen.dart';
 import 'package:do_my/Usuario/ui/screens/work_wth_us.dart';
 import 'package:do_my/widgets/navigation_bar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -93,9 +94,16 @@ class Handler extends StatelessWidget {
               if(!snapshot.hasData){
                 return  Login();
               }else{
-                Map<String,dynamic> datos  = Map<String,dynamic>.from(snapshot.data.snapshot.value);
-                final User user=User.fromJsonMap(datos);
-                return _comprobarRol(user);
+                print("data snap ${jsonEncode(snapshot.data.snapshot.value)})");
+                if(snapshot.data.snapshot.value != null){
+                  Map<String,dynamic> datos  = Map<String,dynamic>.from(snapshot.data.snapshot.value);
+                  final User user=User.fromJsonMap(datos);
+                  return _comprobarRol(user);
+
+                }else{
+                  return PageError();
+                }
+
               }
 
               break;
@@ -104,9 +112,14 @@ class Handler extends StatelessWidget {
               if(!snapshot.hasData){
                 return  Login();
               }else{
-                Map<String,dynamic> datos  =  Map<String,dynamic>.from(snapshot.data.snapshot.value);
-                final User user=User.fromJsonMap(datos);
-                return _comprobarRol(user);
+                if(snapshot.data.snapshot.value != null){
+                  Map<String,dynamic> datos  = Map<String,dynamic>.from(snapshot.data.snapshot.value);
+                  final User user=User.fromJsonMap(datos);
+                  return _comprobarRol(user);
+
+                }else{
+                  return PageError();
+                }
               }
 
           }
@@ -116,22 +129,48 @@ class Handler extends StatelessWidget {
 
   Widget _comprobarRol(User user){
 
-    if(user.isNew){
-      return WorkWithUs(user: user);
+    if(user.isNew){// loica para usuario nuevo
+      print("soy usuario nuevo");
+      if(user.checkWork ?? false){ // si ya ha respondido a la pregunta de trabaja con nosotros
+
+        //ahora preguntamos que respondio la primera vez
+        print("ya respondi si quiero trabajar con domy");
+
+        if(user.rol == "conductor"){ //si hacarmado el check de trabaja con nosotros
+          print("decidi ser conductor");
+
+//          return CompleteProfileDriver(user: user);
+
+        return PageViewDataDriver(user: user,);
+        }else{ // decidio ser cliente
+          print("decidi ser cliente ");
+
+          //debemos preguntar si ya ha llenado este formulario de datos minimos
+
+          if(user.minDataClientComplete?? false){// si ya ha completado los datos minimos se envia al home
+            print("ya he completadd mi perfil como cliente");
+
+            return NavigationBar();
+
+          }else{ //si no ha completado los datos minimos como cliente se debe enviar a rellenarlo
+            print("no he completado mi perfil como cliente");
+
+            return CompleteProfileClient(user: user);
+
+          }
+        }
+
+      }else{//nunca ha respondido a la pregunta de trabaja con nosotros
+        print("aun no he respondido si quiero trabaajar con domy");
+
+        return WorkWithUs(user: user);
+      }
+
+    }else{ // logica para usuario antiguo
+      print("soy un usuario antiguo asi que estoy logueando el lugar de registrarme");
+      return NavigationBar();
     }
 
-    if(!user.minDataClient){
-      return CompleteProfileOne(user: user);
-    }
-
-    if(!user.minDataDriver){
-      return CompleteProfileDriver();
-
-    }
-
-    print("datos de usuario construido con json");
-    print(user.toJson().toString());
-    return NavigationBar();
 
 
   }

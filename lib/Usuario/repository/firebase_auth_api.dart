@@ -110,11 +110,11 @@ class FirebaseAuthAPI{
    signOut() async {
      authResult = null;
 
-     await facebookLogin.logOut();
+     await facebookLogin.logOut().then((value) => print("facebook cerrado}"));
 
-     await _auth.signOut().then((value) => print("sesion cerrada"));
-     await googleSignIn.signOut();
-     await googleSignIn.disconnect();
+     await _auth.signOut().then((value) => print("sesion cerrada firebase"));
+     await googleSignIn.signOut().then((value) => print("sesion cerrada google"));
+     await googleSignIn.disconnect().then((value) => print("sesion desconectada google")).catchError((error)=> print("error al desconectar sesion google -> ${error.toString()}"));
 
 
 

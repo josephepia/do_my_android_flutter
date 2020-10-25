@@ -68,6 +68,8 @@ class _WorkWithUsState extends State<WorkWithUs> {
               widget.user.rol = "cliente";
             }
 
+            widget.user.checkWork = true;
+
             userBloc.updateUser(user: widget.user);
           },
           child: Text("Continuar",

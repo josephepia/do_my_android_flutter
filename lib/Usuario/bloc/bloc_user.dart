@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:camera/camera.dart';
 import 'package:do_my/Pedido/model/pedido.dart';
 import 'package:do_my/Usuario/model/user.dart';
 import 'package:do_my/Usuario/model/user_location.dart';
@@ -28,6 +29,7 @@ class UserBloc implements Bloc{
   static UserBloc _instancia;
 
   static final UserBloc _singleton = UserBloc._internal();
+  List<CameraDescription> cameras;
 
   factory UserBloc(){
 //    if(_instancia == null){
@@ -81,6 +83,12 @@ _geoListen(dynamic geo){
   Stream myProfileOnce2(String uid) => _database_repository.myProfileOnce2(uid);
 //  Stream streamUser = _database_repository.streamUser
 
+  saveUser(User user) => _database_repository.saveUserFirebase(user);
+
+  Future updateUser({User user, bool checkConductor}) => _database_repository.updateUserFirebase(user: user,checkConductor: checkConductor);
+  lastLoginUser(User user) => _database_repository.lastLoginUserFirebase(user);
+  Future sendVerificarionPhone(String phoneNumber) => _auth_repository.sendVerificarionPhone(phoneNumber);
+
   StreamController<UserLocation> _locationController = StreamController<UserLocation>.broadcast();
 
   Stream<UserLocation>  get locationStream => _locationController.stream;
@@ -108,35 +116,25 @@ _geoListen(dynamic geo){
     return _currentLocation;
   }
 
-  UserBloc._internal(){
-//    location.requestPermission().then((granted){
-//
-//      if(granted == PermissionStatus.granted){
-//        location.onLocationChanged.listen((locationData) {
-//          if(locationData != null){
-//
-//            _locationController.add(UserLocation(latitude: locationData.latitude, longitude: locationData.longitude));
-//
-//          }
-//        });
-//      }
-//    });
+  Future updateDatabaseMap(String ref, Map<String, dynamic> datos) => _database_repository.updateDatabaseMap(ref, datos);
+  Future updateDatabaseMapRoot(Map<String, dynamic> datos) => _database_repository.updateDatabaseMapRoot(datos);
+  Future setDatabase(String ref, dynamic datos) => _database_repository.setDatabase(ref, datos);
 
-//    geo.getPositionStream(forceAndroidLocationManager: true, desiredAccuracy: geo.LocationAccuracy.low, distanceFilter: 2).asBroadcastStream(
-//        onListen: (dat){
-//          dat.onData((posi) {
-//            geoController.sink.add(posi);
-//          });
-//        }
-//    );
+  UserBloc._internal(){
+
     geo.getPositionStream(forceAndroidLocationManager: true, desiredAccuracy: geo.LocationAccuracy.low, distanceFilter: 2).asBroadcastStream().listen((posi) {
                   geoController.sink.add(posi);
 
     });
 
 
+    //declaracion pra el uso de la camara global
 
-//    loaadSearchMapbox();
+    getCameras();
+  }
+
+  getCameras() async{
+    cameras = await availableCameras();
   }
 
   Future<UserLocation> getLocation() async{
@@ -223,11 +221,7 @@ _geoListen(dynamic geo){
     await _auth_repository.singOut();
   }
 
-  saveUser(User user) => _database_repository.saveUserFirebase(user);
 
-  Future updateUser({User user, bool checkConductor}) => _database_repository.updateUserFirebase(user: user,checkConductor: checkConductor);
-  lastLoginUser(User user) => _database_repository.lastLoginUserFirebase(user);
-  Future sendVerificarionPhone(String phoneNumber) => _auth_repository.sendVerificarionPhone(phoneNumber);
 
   @override
   void dispose() {

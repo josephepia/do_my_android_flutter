@@ -12,7 +12,13 @@ class User {
   String correo;
   String photoUrl;
   bool verificado;
+  bool conductorVerificado;
+  bool checkWork;
   String estadoAprobacion;
+  bool minDataClientComplete;
+  bool minDataDriverComplete;
+  bool minDataVehicleComplete;
+  bool minDataDocumentComplete;
 
    int dateCreate;
    int dateUpdate;
@@ -78,7 +84,13 @@ class User {
     this.SOATUrlB,
     this.minDataClient,
     this.minDataDriver,
-    this.isNew
+    this.isNew,
+    this.conductorVerificado,
+    this.checkWork,
+    this.minDataClientComplete,
+    this.minDataDriverComplete,
+    this.minDataVehicleComplete,
+    this.minDataDocumentComplete
   });
 
   User.fromJsonMap(Map<String,dynamic> json){
@@ -117,9 +129,15 @@ class User {
     tipoSangre              = json['tipoSangre'];
     SOATUrlA                = json['SOATUrlA'];
     SOATUrlB                = json['SOATUrlB'];
-    minDataClient           = json['minDataClient'];
-    minDataDriver           = json['minDataDriver'];
-    isNew                   = json['isNew'];
+    minDataClient           = json['minDataClient'] ?? false;
+    minDataDriver           = json['minDataDriver'] ?? false;
+    isNew                   = json['isNew'] ?? false;
+    conductorVerificado     = json['conductorVerificado'] ?? true;
+    checkWork               = json['checkWork'] ?? false;
+    minDataClientComplete   = json['minDataClientComplete'] ?? false;
+    minDataDriverComplete   = json['minDataDriverComplete'] ?? false;
+    minDataVehicleComplete  = json['minDataVehicleComplete'] ?? false;
+    minDataDocumentComplete  = json['minDataDocumentComplete'] ?? false;
   }
 
 
@@ -158,7 +176,13 @@ class User {
          'SOATUrlB':    SOATUrlB,
          'minDataClient': minDataClient,
          'minDataDriver': minDataDriver,
-         'isNew':         isNew
+         'isNew':         isNew,
+         'conductorVerificado': conductorVerificado,
+         'checkWork': checkWork,
+         'minDataClientComplete': minDataClientComplete,
+         'minDataDriverComplete': minDataDriverComplete,
+         'minDataVehicleComplete': minDataVehicleComplete,
+         'minDataDocumentComplete': minDataDocumentComplete,
 };
 
   //  o Matricula

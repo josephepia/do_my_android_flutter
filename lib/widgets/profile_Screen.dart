@@ -83,22 +83,24 @@ class Profile extends StatelessWidget {
                                     print(snapshop2.data.snapshot.value['nombre']);
                                     print(snapshop2.data.snapshot.value['rol']);
 //                        userBloc.getUser2(snapshop.data.uid).then((value) {});
-                                    var usuario = User(
-                                        correo: snapshop2.data.snapshot.value['correo'] ?? "completa este campo",
-                                        nombre: snapshop2.data.snapshot.value['nombre'],
-                                        photoUrl: snapshop2.data.snapshot.value['photoUrl'] ?? '',
-                                        rol: snapshop2.data.snapshot.value['rol'] ?? '',
-                                        uid: snapshot.data.uid,
-                                        identificacion: snapshop2.data.snapshot.value['identificacion'],
-                                        telefono: snapshop2.data.snapshot.value['telefono'],
-                                        tipoSangre: snapshop2.data.snapshot.value['tipoSangre'],
-                                        colorVehiculo: snapshop2.data.snapshot.value['colorVehiculo'],
-                                        marcaVehiculo: snapshop2.data.snapshot.value['marcaVehiculo'],
-                                        tipoVehiculo: snapshop2.data.snapshot.value['tipoVehiculo'],
-                                        matriculaVehiculo: snapshop2.data.snapshot.value['matriculaVehiculo']
-
-
-                                    );
+                                    Map<String,dynamic> datos  = Map<String,dynamic>.from(snapshop2.data.snapshot.value);
+                                    var usuario = User.fromJsonMap(datos);
+//                                    var usuario = User(
+//                                        correo: snapshop2.data.snapshot.value['correo'] ?? "completa este campo",
+//                                        nombre: snapshop2.data.snapshot.value['nombre'],
+//                                        photoUrl: snapshop2.data.snapshot.value['photoUrl'] ?? '',
+//                                        rol: snapshop2.data.snapshot.value['rol'] ?? '',
+//                                        uid: snapshot.data.uid,
+//                                        identificacion: snapshop2.data.snapshot.value['identificacion'],
+//                                        telefono: snapshop2.data.snapshot.value['telefono'],
+//                                        tipoSangre: snapshop2.data.snapshot.value['tipoSangre'],
+//                                        colorVehiculo: snapshop2.data.snapshot.value['colorVehiculo'],
+//                                        marcaVehiculo: snapshop2.data.snapshot.value['marcaVehiculo'],
+//                                        tipoVehiculo: snapshop2.data.snapshot.value['tipoVehiculo'],
+//                                        matriculaVehiculo: snapshop2.data.snapshot.value['matriculaVehiculo']
+//
+//
+//                                    );
 
 //                                    var usuario = User.fromJsonMap(
 //                                        snapshop2.data.snapshot.value()
@@ -119,37 +121,10 @@ class Profile extends StatelessWidget {
                                           ),
 
                                           _vehiculo(context, usuario),
-//                                          Row(
-//                                            children: [
-//                                              Padding(
-//                                                padding:
-//                                                    const EdgeInsets.all(10.0),
-//                                                child: Chip(
-//                                                  avatar: CircleAvatar(
-//                                                    backgroundColor:
-//                                                        Colors.grey.shade800,
-//                                                    child: Text('AB'),
-//                                                  ),
-//                                                  label: Text('Aaron Burr'),
-//                                                ),
-//                                              )
-//                                            ],
-//                                          ),
-//                                          SizedBox(height: 10.0,),
-//                                          _datosPersonales(context,usuario),
-//                                          Divider(),
-//                                          _documentos(context,usuario),
-//                                          Flexible(
-//                                            child: Container(
-//                                              width: MediaQuery.of(context)
-//                                                  .size
-//                                                  .width,
-//                                              margin: EdgeInsets.symmetric(
-//                                                  vertical: 10.0),
-//                                              padding: EdgeInsets.all(16.0),
-//                                              child: Datos(usuario),
-//                                            ),
-//                                          ),
+                                          SizedBox(
+                                            height: 10.0,
+                                          ),
+                                          _inscripcion(context, usuario)
                                         ]);
                                   default:
                                     return null;
@@ -865,6 +840,61 @@ class Profile extends StatelessWidget {
 
   Widget _inscripcion(BuildContext context, User usuario){
 
+
+    return InkWell(
+      child: Ink(
+        width: 310,
+        height: 600,
+        padding: EdgeInsets.all(16.0),
+
+        decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20.0),
+            boxShadow: [BoxShadow(
+                blurRadius: 20.0,
+                color: Colors.black12,
+                offset: Offset(0.0,0.7)
+            )],
+
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+//          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+//            Container(
+//              color: Colors.green,
+//              child: Text("Flutter"),
+//              constraints: BoxConstraints.expand(),
+//            ),
+            Column(
+              mainAxisSize: MainAxisSize.max,
+
+              children: [
+                Container(
+                width: 10.0,
+height: 10,
+//                height: double.infinity,
+//              height: double.infinity,
+                    color: Colors.blue,
+//                constraints: BoxConstraints.expand(),
+                  ),
+              ],
+            ),
+
+            Column(
+              mainAxisSize: MainAxisSize.min,
+
+              children: [
+
+                Text("Inscripcion", style: TextStyle(
+                    fontFamily: "Poppins"
+                ),)
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
 
 
   }

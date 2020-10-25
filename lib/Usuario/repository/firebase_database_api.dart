@@ -7,6 +7,7 @@ import 'package:firebase_database/firebase_database.dart';
 
 class FirebaseDatabaseAPI {
 
+  final _databaseInstance = FirebaseDatabase.instance;
   final userRef = FirebaseDatabase.instance.reference().child('usuarios');
 
   final serviciosRef = FirebaseDatabase.instance.reference().child('servicios');
@@ -16,6 +17,7 @@ class FirebaseDatabaseAPI {
   Future<User> myProfileOnce(String uid) async{
     return await userRef.child(uid).once().then((snapShot){
       Map<dynamic,dynamic> values = snapShot.value;
+      Map<String,dynamic> datos  = Map<String,dynamic>.from(snapShot.value);
 //      print("pruebas de impresion por atributo de snapshot.value --------");
 //      print(snapShot.value.toString());
 //      print(snapShot.value["nombre"]);
@@ -34,19 +36,21 @@ class FirebaseDatabaseAPI {
 ////        ));
 //      });
 
-      User user = User(
-        nombre: snapShot.value["nombre"],
-        correo: snapShot.value["correo"],
-        biografia: snapShot.value["biografia"] ?? "Cuentanos mas sobre ti",
-        photoUrl: snapShot.value["photoUrl"],
-        dateCreate: snapShot.value["dateCreate"],
-        dateUpdate: snapShot.value["dateUpdate"],
-        identificacion: snapShot.value["identificacion"],
-        uid: uid,
-        lastLogin: snapShot.value["lasLogin"],
-        telefono: snapShot.value["telefono"],
-        profileComplete: snapShot.value["profileComplete"]
-      );
+      User user = User.fromJsonMap(datos);
+
+//      User user = User(
+//        nombre: snapShot.value["nombre"],
+//        correo: snapShot.value["correo"],
+//        biografia: snapShot.value["biografia"] ?? "Cuentanos mas sobre ti",
+//        photoUrl: snapShot.value["photoUrl"],
+//        dateCreate: snapShot.value["dateCreate"],
+//        dateUpdate: snapShot.value["dateUpdate"],
+//        identificacion: snapShot.value["identificacion"],
+//        uid: uid,
+//        lastLogin: snapShot.value["lasLogin"],
+//        telefono: snapShot.value["telefono"],
+//        profileComplete: snapShot.value["profileComplete"]
+//      );
 
 
       return user;
@@ -60,23 +64,47 @@ class FirebaseDatabaseAPI {
     yield userRef.child(uid).onValue;
   }
 
+  Future updateDatabaseMapRoot(Map<String, dynamic> datos){
+    return _databaseInstance.reference().update(datos);
+  }
+
+  Future updateDatabaseMap(String ref, Map<String, dynamic> datos) async{
+    Map<String,dynamic> finalData = Map<String,dynamic>();
+
+    datos.forEach((k,v) {
+      print("key $k valor $v");
+      if(v!= null){
+        finalData[k] = v;
+      }
+
+    });
+    return _databaseInstance.reference().child(ref).update(finalData);
+
+  }
+  Future setDatabase(String ref, dynamic datos) async{
+    return _databaseInstance.reference().child(ref).set(datos);
+  }
+
   User buildUser(DataSnapshot snapShot){
 //    Map<dynamic,dynamic> values = snapShot.value;
-    User user = User(
-        nombre: snapShot.value["nombre"],
-        correo: snapShot.value["correo"],
-        biografia: snapShot.value["biografia"] ?? "Cuentanos mas sobre ti",
-        photoUrl: snapShot.value["photoUrl"],
-        dateCreate: snapShot.value["dateCreate"],
-        dateUpdate: snapShot.value["dateUpdate"],
-        identificacion: snapShot.value["identificacion"],
-        uid: snapShot.value["uid"],
-        lastLogin: snapShot.value["lasLogin"],
-        telefono: snapShot.value["telefono"],
-        profileComplete: snapShot.value["profileComplete"],
-        profileMinDataComplete: snapShot.value["profileMinDataComplete"],
+    Map<String,dynamic> datos  = Map<String,dynamic>.from(snapShot.value);
 
-    );
+    User user = User.fromJsonMap(datos);
+//    User user = User(
+//        nombre: snapShot.value["nombre"],
+//        correo: snapShot.value["correo"],
+//        biografia: snapShot.value["biografia"] ?? "Cuentanos mas sobre ti",
+//        photoUrl: snapShot.value["photoUrl"],
+//        dateCreate: snapShot.value["dateCreate"],
+//        dateUpdate: snapShot.value["dateUpdate"],
+//        identificacion: snapShot.value["identificacion"],
+//        uid: snapShot.value["uid"],
+//        lastLogin: snapShot.value["lasLogin"],
+//        telefono: snapShot.value["telefono"],
+//        profileComplete: snapShot.value["profileComplete"],
+//        profileMinDataComplete: snapShot.value["profileMinDataComplete"],
+//
+//    );
 
 
     return user;
@@ -85,27 +113,30 @@ class FirebaseDatabaseAPI {
   Future<User> getUser(String uid) async{
     return await userRef.orderByKey().equalTo(uid).limitToFirst(1).once().then((snapShot){
       Map<dynamic,dynamic> values = snapShot.value;
+      Map<String,dynamic> datos  = Map<String,dynamic>.from(snapShot.value);
 
-      values.forEach((k,v) {
-        print("- key  ${k} -value ${v}");
-//        servicios.add(Servicio(
-//          descripcion: v['descripcion'] ,
-//          imagen: v['imagenUrl'],
-//          titulo: v['nombre'],
-//        ));
-      });
-      User user = User(
-        nombre: snapShot.value.nombre,
-        correo: snapShot.value.correo,
-        biografia: snapShot.value.biografia ?? "Cuentanos mas sobre ti",
-        photoUrl: snapShot.value.photoUrl,
-        dateCreate: snapShot.value.dateCreate,
-        dateUpdate: snapShot.value.dateUpdate,
-        identificacion: snapShot.value.identificacion,
-        uid: uid,
-        lastLogin: snapShot.value.lasLogin,
-        telefono: snapShot.value.telefono
-      );
+          User user = User.fromJsonMap(datos);
+//      values.forEach((k,v) {
+//        print("- key  ${k} -value ${v}");
+////        servicios.add(Servicio(
+////          descripcion: v['descripcion'] ,
+////          imagen: v['imagenUrl'],
+////          titulo: v['nombre'],
+////        ));
+//      });
+//
+//      User user = User(
+//        nombre: snapShot.value.nombre,
+//        correo: snapShot.value.correo,
+//        biografia: snapShot.value.biografia ?? "Cuentanos mas sobre ti",
+//        photoUrl: snapShot.value.photoUrl,
+//        dateCreate: snapShot.value.dateCreate,
+//        dateUpdate: snapShot.value.dateUpdate,
+//        identificacion: snapShot.value.identificacion,
+//        uid: uid,
+//        lastLogin: snapShot.value.lasLogin,
+//        telefono: snapShot.value.telefono
+//      );
 
 
       return user;
@@ -123,6 +154,7 @@ class FirebaseDatabaseAPI {
       profileMinComplete = true;
       user.minDataClient = true;
     }
+//    user.isNew = false;
 
 //    if(user.rol == "conductor"){
 //      if(user.)
@@ -187,6 +219,7 @@ class FirebaseDatabaseAPI {
   lastLoginUser(User user){
 //    Map<String, dynamic>  userData = user;
     userRef.child(user.uid).update({
+      'isNew': false,
       'lastLogin': ServerValue.timestamp
     }).then((_){
       print("usuario actualizado correctamente");
@@ -195,21 +228,63 @@ class FirebaseDatabaseAPI {
     });
   }
 
-  saveUser(User user){
-    userRef.child(user.uid).set({
-      "uid": user.uid,
-      "nombre": user.nombre,
-      "correo": user.correo,
-      "photoUrl": user.photoUrl,
-      'dateUpdate': ServerValue.timestamp,
-      'dateCreate': ServerValue.timestamp,
-      'lastLogin': ServerValue.timestamp,
-      'profileMinDataComplete': false,
-      'profileComplete': false
-    }).then((_){
+  saveUser(User user) async{
+//    Map<String,dynamic> userData = Map<String,dynamic>();
+  print('inicio del metodo saveUser');
+    user.isNew = true;
+    var userData= user.toJson();
+
+    userData['dateUpdate'] = ServerValue.timestamp;
+    userData['dateCreate'] = ServerValue.timestamp;
+    userData['lastLogin']  = ServerValue.timestamp;
+  print('inicio de guardar usuario en base de datos');
+
+  await userRef.child(user.uid).set(userData).then((_){
       print("usuario actualizado correctamente}");
     }).catchError((onError){
       print("ocurrio un error al crear el usuario ${onError}");
     });
+
+    await _databaseInstance.reference().child("solicitudess").child(user.uid).update(
+      {
+        "estado": "pendiente",
+        "documentos": {
+          "soat": {
+            "estado": "pendiente"
+          },
+          "licencia": {
+            "estado": "pendiente"
+          },
+          "soat": {
+            "estado": "pendiente"
+          },
+          "identificacion": {
+            "estado": "pendiente"
+          },
+          "fotoVehiculo": {
+            "estado": "pendiente"
+          },
+        },
+
+      }
+    );
+    
+    
+
+//    userRef.child(user.uid).set({
+//      "uid": user.uid,
+//      "nombre": user.nombre,
+//      "correo": user.correo,
+//      "photoUrl": user.photoUrl,
+//      'dateUpdate': ServerValue.timestamp,
+//      'dateCreate': ServerValue.timestamp,
+//      'lastLogin': ServerValue.timestamp,
+//      'profileMinDataComplete': false,
+//      'profileComplete': false
+//    }).then((_){
+//      print("usuario actualizado correctamente}");
+//    }).catchError((onError){
+//      print("ocurrio un error al crear el usuario ${onError}");
+//    });
   }
 }

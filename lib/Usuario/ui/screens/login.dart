@@ -1,4 +1,4 @@
-import 'package:do_my/Usuario/ui/screens/complete_profile_one_screen.dart';
+import 'package:do_my/Usuario/ui/screens/complete_profile_client_screen.dart';
 import 'package:do_my/Usuario/ui/screens/send_number_phone_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:do_my/Usuario/bloc/bloc_user.dart';
@@ -31,7 +31,8 @@ class _Login extends State<Login>{
   Widget build(BuildContext context) {
     phonController = TextEditingController();
     userBloc = BlocProvider.of<UserBloc>(context);
-    return _handleCurrentSession(context,userBloc);
+//    return _handleCurrentSession(context,userBloc);
+  return LoginContent();
   }
 
   Widget _handleCurrentSession(BuildContext context, UserBloc userBloc){
@@ -76,7 +77,7 @@ class _Login extends State<Login>{
 
                     }else{
                       print('usuario con perfil incompleto');
-                      return CompleteProfileOne(user: user);
+                      return CompleteProfileClient(user: user);
                     }
                     break;
                   case ConnectionState.done:
@@ -89,7 +90,7 @@ class _Login extends State<Login>{
 
                     }else{
                       print('usuario con perfil incompleto');
-                      return CompleteProfileOne();
+                      return CompleteProfileClient();
                     }
                     break;
                   default:
@@ -215,12 +216,16 @@ class LoginContent extends StatelessWidget {
                       nombre: authResult.user.displayName,
                       correo: authResult.user.email,
                       photoUrl: authResult.user.photoUrl,
+                      telefono: authResult.user.phoneNumber
 //                          dateCreate: ServerValue.timestamp
                     );
                     if(authResult.additionalUserInfo.isNewUser){
-
+                      print('usuario nueevo');
+                      user.isNew = true;
                       userBloc.saveUser(user);
                     }else{
+                      print('es usuario antiguo');
+                      user.isNew = false;
                       userBloc.lastLoginUser(user);
                     }
                   });
@@ -242,12 +247,16 @@ class LoginContent extends StatelessWidget {
                       nombre: authResult.user.displayName,
                       correo: authResult.user.email,
                       photoUrl: authResult.user.photoUrl,
+                        telefono: authResult.user.phoneNumber
+
                       //                          dateCreate: ServerValue.timestamp
                     );
                     if(authResult.additionalUserInfo.isNewUser){
 
                       userBloc.saveUser(user);
                     }else{
+                      user.isNew = false;
+
                       userBloc.lastLoginUser(user);
 
                     }

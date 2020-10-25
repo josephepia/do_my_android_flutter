@@ -6,14 +6,14 @@ import 'package:flutter/services.dart';
 import 'package:do_my/main.dart';
 import 'package:do_my/servi/servi_navigator.dart';
 
-class CompleteProfileOne extends StatefulWidget {
+class CompleteProfileClient extends StatefulWidget {
   User user;
-  CompleteProfileOne({Key key, this.user});
+  CompleteProfileClient({Key key, this.user});
   @override
-  _CompleteProfileOneState createState() => _CompleteProfileOneState();
+  _CompleteProfileClientState createState() => _CompleteProfileClientState();
 }
 
-class _CompleteProfileOneState extends State<CompleteProfileOne> {
+class _CompleteProfileClientState extends State<CompleteProfileClient> {
   UserBloc userBloc;
 
   TextEditingController inputNombre;
@@ -52,7 +52,7 @@ class _CompleteProfileOneState extends State<CompleteProfileOne> {
                 height: 50.0,
               ),
               Text(
-                "Queremos conocerte",
+                "Confirma los siguientes datos",
                 style: TextStyle(
                     fontFamily: "Poppins",
                     fontWeight: FontWeight.bold,
@@ -65,31 +65,32 @@ class _CompleteProfileOneState extends State<CompleteProfileOne> {
 
                     child: Column(
                   children: [
-                    Center(
-                      child: CheckboxListTile(
-                          title: Text(
-                            "¿ Quieres trabajar con nosotros ?",
-                            style: TextStyle(
-                                fontFamily: "Popins",
-                                fontSize: 12.0
-
-                            ),
-                          ),
-
-                          controlAffinity: ListTileControlAffinity.leading,
-                          value: checkConductor,
-                          onChanged: (bool value){
-                            setState(() {
-                              print("valor del chaeck -> $value");
-                              checkConductor = value;
-                            });
-                          }
-                      ),
-                    ),
+//                    Center(
+//                      child: CheckboxListTile(
+//                          title: Text(
+//                            "¿ Quieres trabajar con nosotros ?",
+//                            style: TextStyle(
+//                                fontFamily: "Popins",
+//                                fontSize: 12.0
+//
+//                            ),
+//                          ),
+//
+//                          controlAffinity: ListTileControlAffinity.leading,
+//                          value: checkConductor,
+//                          onChanged: (bool value){
+//                            setState(() {
+//                              print("valor del chaeck -> $value");
+//                              checkConductor = value;
+//                            });
+//                          }
+//                      ),
+//                    ),
                     TextFormField(
                       controller: inputNombre,
                       maxLines: 1,
                       keyboardType: TextInputType.text,
+                      textCapitalization: TextCapitalization.words,
                       inputFormatters: [
                         FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
                       ],
@@ -178,17 +179,9 @@ class _CompleteProfileOneState extends State<CompleteProfileOne> {
                         print("datos del usuario");
                         print(widget.user.telefono);
                         print(widget.user.nombre);
-                        if(checkConductor){
-                          widget.user.rol = "conductor";
-                        }
+                        widget.user.minDataClientComplete = true;
 
-
-                        userBloc.updateUser(user: widget.user, checkConductor: checkConductor).then((value){
-                          if(checkConductor){
-                            locator<NavigationService>().navigateTo(routeName: 'completeProfileDriver', arguments: widget.user);
-//                            navigatorKey.currentState.pushNamed('/completeProfileDriver', arguments: widget.user);
-                          }
-                        });
+                        userBloc.updateUser(user: widget.user);
                       }
                     },
                     child: Ink(

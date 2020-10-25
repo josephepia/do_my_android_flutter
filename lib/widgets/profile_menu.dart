@@ -137,12 +137,7 @@ class ProfileMenu extends StatelessWidget {
             ),
           ),
           onTap: () {
-            StreamBuilder(
-              stream: userBloc.signOut(),
-              builder: (context, snapshot) {
-                print("clic en cerrar sesion");
-              },
-            );
+            userBloc.signOut();
           },
         ),
 //        ListTile(

@@ -74,6 +74,12 @@ dependencies:
   mapbox_search: ^2.0.1
   #check redondos
   roundcheckbox: ^1.0.0+1
+  #camara nativa de flutter
+  camera: ^0.5.8+8
+  #plugin para path file temporales
+  path_provider: ^1.6.18
+  #para unit cadenas
+  path: ^1.7.0
 
 
 dev_dependencies:

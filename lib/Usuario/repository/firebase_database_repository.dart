@@ -14,4 +14,8 @@ class FirebaseDatabaseRepository {
   Stream myProfileOnce2(String uid) => _firebaseAPI.myProfileOnce2(uid);
 
   User buildUser(DataSnapshot snapShot) => _firebaseAPI.buildUser(snapShot);
+
+  Future updateDatabaseMap(String ref, Map<String, dynamic> datos) => _firebaseAPI.updateDatabaseMap(ref, datos);
+  Future updateDatabaseMapRoot(Map<String, dynamic> datos) => _firebaseAPI.updateDatabaseMapRoot(datos);
+  Future setDatabase(String ref, dynamic datos) => _firebaseAPI.setDatabase(ref, datos);
 }

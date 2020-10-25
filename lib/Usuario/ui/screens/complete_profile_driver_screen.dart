@@ -10,6 +10,8 @@ import 'package:generic_bloc_provider/generic_bloc_provider.dart';
 import 'package:image_picker/image_picker.dart';
 
 class CompleteProfileDriver extends StatefulWidget {
+  User user;
+  CompleteProfileDriver({Key key, this.user});
   @override
   _CompleteProfileDriverState createState() => _CompleteProfileDriverState();
 }
@@ -23,23 +25,23 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
   Color colorPrimary = Color.fromRGBO(9, 46, 135, 1.0);
 
   GlobalKey formKey = GlobalKey<FormState>();
-  User user;
+
   File imagenPerfil;
   UserBloc userBloc;
   @override
   Widget build(BuildContext context) {
     userBloc = BlocProvider.of<UserBloc>(context);
-    user = ModalRoute.of(context).settings.arguments;
+//    user = ModalRoute.of(context).settings.arguments;
     print("iniciando completar perfil");
     print('datos del usuario que llega por parametro');
-    print(user.nombre);
+    print(widget.user.nombre);
     print("uid -> ");
-    print(user.uid);
-    print(user.telefono);
-    print(user.photoUrl);
-    inputIdentificacion.text = user.identificacion ?? "";
-    inputMatrcula.text = user.matriculaVehiculo ?? "";
-    inputMarcaVehiculo.text = user.marcaVehiculo ?? "";
+    print(widget.user.uid);
+    print(widget.user.telefono);
+    print(widget.user.photoUrl);
+    inputIdentificacion.text = widget.user.identificacion ?? "";
+    inputMatrcula.text = widget.user.matriculaVehiculo ?? "";
+    inputMarcaVehiculo.text = widget.user.marcaVehiculo ?? "";
 
     return Scaffold(
       body: Container(
@@ -53,7 +55,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                     child: Form(
                       key: formKey,
                       child: StreamBuilder<Object>(
-                        stream: userBloc.myProfileDataOnline(user.uid),
+                        stream: userBloc.myProfileDataOnline(widget.user.uid),
                         builder: (context, AsyncSnapshot snapshot2) {
 
                           switch(snapshot2.connectionState) {
@@ -106,8 +108,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/perfil.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.photoUrl = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.photoUrl = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -151,7 +153,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       WhitelistingTextInputFormatter.digitsOnly
                                     ],
                                     onSaved: (value){
-                                      user.identificacion = value;
+                                      widget.user.identificacion = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -191,7 +193,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
 //                            FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
 //                          ],
                                     onSaved: (value){
-                                      user.matriculaVehiculo = value;
+                                      widget.user.matriculaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -231,7 +233,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
                                     ],
                                     onSaved: (value){
-                                      user.marcaVehiculo = value;
+                                      widget.user.marcaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -271,7 +273,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
                                     ],
                                     onSaved: (value){
-                                      user.marcaVehiculo = value;
+                                      widget.user.marcaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -348,8 +350,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("documentos/${userTemp.uid}/identifiacionA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.identificacionUrlA = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.identificacionUrlA = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -373,8 +375,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                            image: user.identificacionUrlA == null ?  null : DecorationImage(
-                                              image: NetworkImage(user.identificacionUrlA),
+                                            image: widget.user.identificacionUrlA == null ?  null : DecorationImage(
+                                              image: NetworkImage(widget.user.identificacionUrlA),
                                               fit: BoxFit.cover
                                             )
                                           ),
@@ -404,8 +406,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/identifiacionB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.identificacionUrlB = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.identificacionUrlB = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -428,8 +430,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.identificacionUrlB == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.identificacionUrlB),
+                                              image: widget.user.identificacionUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.identificacionUrlB),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -473,8 +475,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaTransitoA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                       storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                       snapchot.ref.getDownloadURL().then((urlImage){
-                                      user.licenciaTransitoUrlA = urlImage;
-                                      userBloc.updateUser(user: user);
+                                      widget.user.licenciaTransitoUrlA = urlImage;
+                                      userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -498,8 +500,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.licenciaTransitoUrlA == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.licenciaTransitoUrlA),
+                                              image: widget.user.licenciaTransitoUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.licenciaTransitoUrlA),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -529,8 +531,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaTransitoB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.licenciaTransitoUrlB = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.licenciaTransitoUrlB = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -553,8 +555,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.licenciaTransitoUrlB == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.licenciaTransitoUrlB),
+                                              image: widget.user.licenciaTransitoUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.licenciaTransitoUrlB),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -599,8 +601,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/vehiculo.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.photoUrlCar = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.photoUrlCar = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -624,8 +626,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.photoUrlCar == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.photoUrlCar),
+                                              image: widget.user.photoUrlCar == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.photoUrlCar),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -671,8 +673,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaA.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.licenciaConducirUrlA = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.licenciaConducirUrlA = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -696,8 +698,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.licenciaConducirUrlA == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.licenciaConducirUrlA),
+                                              image: widget.user.licenciaConducirUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.licenciaConducirUrlA),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -727,8 +729,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/licenciaB.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.licenciaConducirUrlB = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.licenciaConducirUrlB = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -751,8 +753,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.licenciaConducirUrlB == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.licenciaConducirUrlB),
+                                              image: widget.user.licenciaConducirUrlB == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.licenciaConducirUrlB),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -797,8 +799,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                           userBloc.uploadFile("imagenes/${userTemp.uid}/soat.${exten}", imagenPerfil).then((StorageUploadTask storageUpload){
                                             storageUpload.onComplete.then((StorageTaskSnapshot snapchot){
                                               snapchot.ref.getDownloadURL().then((urlImage){
-                                                user.SOATUrlA = urlImage;
-                                                userBloc.updateUser(user: user);
+                                                widget.user.SOATUrlA = urlImage;
+                                                userBloc.updateUser(user: widget.user);
 
 //                                                setState(() {
 //
@@ -822,8 +824,8 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                                     blurRadius: 20.0
                                                 )
                                               ],
-                                              image: user.SOATUrlA == null ?  null : DecorationImage(
-                                                  image: NetworkImage(user.SOATUrlA),
+                                              image: widget.user.SOATUrlA == null ?  null : DecorationImage(
+                                                  image: NetworkImage(widget.user.SOATUrlA),
                                                   fit: BoxFit.cover
                                               )
                                           ),
@@ -849,7 +851,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                     decoration: BoxDecoration(
                                         shape: BoxShape.circle,
                                         image: DecorationImage(
-                                            image: NetworkImage(user.photoUrl),
+                                            image: NetworkImage(widget.user.photoUrl),
                                             fit: BoxFit.cover
                                         )
                                     ),
@@ -927,7 +929,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       WhitelistingTextInputFormatter.digitsOnly
                                     ],
                                     onSaved: (value){
-                                      user.identificacion = value;
+                                      widget.user.identificacion = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -967,7 +969,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
 //                            FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
 //                          ],
                                     onSaved: (value){
-                                      user.matriculaVehiculo = value;
+                                      widget.user.matriculaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -1007,7 +1009,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
                                     ],
                                     onSaved: (value){
-                                      user.marcaVehiculo = value;
+                                      widget.user.marcaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
@@ -1047,7 +1049,7 @@ class _CompleteProfileDriverState extends State<CompleteProfileDriver> {
                                       FilteringTextInputFormatter.allow(RegExp(r"[a-zA-Z]+|\s"))
                                     ],
                                     onSaved: (value){
-                                      user.marcaVehiculo = value;
+                                      widget.user.marcaVehiculo = value;
                                     },
                                     validator: (value) {
                                       if (value.isEmpty || value == "") {
