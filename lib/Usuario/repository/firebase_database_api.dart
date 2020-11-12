@@ -248,20 +248,26 @@ class FirebaseDatabaseAPI {
     await _databaseInstance.reference().child("solicitudess").child(user.uid).update(
       {
         "estado": "pendiente",
+        "usuario": {
+          "nombre": user.nombre,
+          "identificacion": user.identificacion,
+          "photoUrl": user.photoUrl
+        },
         "documentos": {
-          "soat": {
-            "estado": "pendiente"
-          },
           "licencia": {
+            "nombre": "Licencia",
             "estado": "pendiente"
           },
           "soat": {
+            "nombre": "SOAT",
             "estado": "pendiente"
           },
           "identificacion": {
+            "nombre": "Identificacion",
             "estado": "pendiente"
           },
           "fotoVehiculo": {
+            "nombre": "Foto del vehiculo",
             "estado": "pendiente"
           },
         },

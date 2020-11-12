@@ -124,7 +124,7 @@ class Profile extends StatelessWidget {
                                           SizedBox(
                                             height: 10.0,
                                           ),
-                                          _inscripcion(context, usuario)
+//                                          _inscripcion(context, usuario)
                                         ]);
                                   default:
                                     return null;

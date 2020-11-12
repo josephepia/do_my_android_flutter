@@ -44,7 +44,7 @@ class _SendNumberPhoneState extends State<SendNumberPhone> {
                   Container(
                     decoration: BoxDecoration(
                       image: DecorationImage(
-                        image: AssetImage("images/logo.png"),
+                        image: AssetImage("images/logoPrimario.png"),
                         fit: BoxFit.contain
                       )
                     ),
@@ -132,7 +132,7 @@ class _SendNumberPhoneState extends State<SendNumberPhone> {
 
                             if(checkTerms){
 //                              Navigator.of(context).pushNamed('/codePhoneValidate', arguments: inputController.text);
-                              blocUser.sendVerificarionPhone('+57${inputController.text}').then((value) => Navigator.of(context).pushNamed('/codePhoneValidate', arguments: inputController.text));
+                              blocUser.sendVerificarionPhone('+57${inputController.text}').then((value) => Navigator.of(context).pushNamed('codePhoneValidate', arguments: inputController.text));
                             }else{
                               Scaffold.of(context).showSnackBar(
                                   SnackBar(content:  Text("Debe aceptar los terminos"))

@@ -1,6 +1,8 @@
+
 import 'package:do_my/Usuario/model/user.dart';
+import 'package:do_my/Usuario/repository/firebase_database_api.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_database/firebase_database.dart';
+
 import 'package:flutter_facebook_login/flutter_facebook_login.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -9,6 +11,7 @@ class FirebaseAuthAPI{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final GoogleSignIn googleSignIn = GoogleSignIn();
   final facebookLogin = FacebookLogin();
+  final _databaseAPI = FirebaseDatabaseAPI();
   AuthResult authResult;
   String verificationID;
   AuthCredential _phoneCredential;
@@ -64,6 +67,7 @@ class FirebaseAuthAPI{
     print("resultado -> ${authResult.toString()}");
 
     return authResult;
+
   }
 
   Future sendVerificarionPhone(String phoneNumber) async{
@@ -110,7 +114,8 @@ class FirebaseAuthAPI{
    signOut() async {
      authResult = null;
 
-     await facebookLogin.logOut().then((value) => print("facebook cerrado}"));
+     await facebookLogin.logOut().then((value) => print("facebook cerrado"));
+
 
      await _auth.signOut().then((value) => print("sesion cerrada firebase"));
      await googleSignIn.signOut().then((value) => print("sesion cerrada google"));
@@ -130,7 +135,41 @@ class FirebaseAuthAPI{
 
   }
 
-
+  _isNewOrOldUser(){
+    var user = User(
+        uid: authResult.user.uid,
+        nombre: authResult.user.displayName,
+        correo: authResult.user.email,
+        photoUrl: authResult.user.photoUrl,
+        telefono: authResult.user.phoneNumber
+//                          dateCreate: ServerValue.timestamp
+    );
+    if(authResult.additionalUserInfo.isNewUser){
+      print('usuario nueevo');
+      user = User(
+          uid: authResult.user.uid,
+          nombre: authResult.user.displayName,
+          correo: authResult.user.email,
+          photoUrl: authResult.user.photoUrl,
+          telefono: authResult.user.phoneNumber
+//                          dateCreate: ServerValue.timestamp
+      );
+      user.isNew = true;
+//      userBloc.saveUser(user);
+    }else{
+      user = User(
+          uid: authResult.user.uid,
+          nombre: authResult.user.displayName,
+          correo: authResult.user.email,
+          photoUrl: authResult.user.photoUrl,
+          telefono: authResult.user.phoneNumber
+//                          dateCreate: ServerValue.timestamp
+      );
+      print('es usuario antiguo');
+      user.isNew = false;
+      _databaseAPI.lastLoginUser(user);
+    }
+  }
 
 
 

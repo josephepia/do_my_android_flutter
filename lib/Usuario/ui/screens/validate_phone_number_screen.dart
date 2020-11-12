@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:do_my/Usuario/bloc/bloc_user.dart';
+import 'package:do_my/Usuario/model/user.dart';
 import 'package:do_my/Usuario/repository/auth_repository.dart';
 import 'package:do_my/Usuario/ui/widgets/acept_send_widget.dart';
 import 'package:do_my/widgets/logoSvg_widget.dart';
@@ -90,7 +91,7 @@ class _ValidatePhoneNumberState extends State<ValidatePhoneNumber> {
                   Container(
                     decoration: BoxDecoration(
                         image: DecorationImage(
-                            image: AssetImage("images/logo.png"),
+                            image: AssetImage("images/logoPrimario.png"),
                             fit: BoxFit.contain)),
                     height: 70.0,
                   ),
@@ -151,9 +152,32 @@ class _ValidatePhoneNumberState extends State<ValidatePhoneNumber> {
                       controller: inputCode,
                       onCompleted: (v) {
 
-                        blocUser.signIn(providerAuth: ProviderAuth.phone,codeSms: v).then((value){
+                        blocUser.signIn(providerAuth: ProviderAuth.phone,codeSms: v).then((authResult){
                           print('verificado correctamente');
-                          Navigator.popUntil(context, ModalRoute.withName('/'));
+                          var user =  User(
+                              uid: authResult.user.uid,
+                              nombre: authResult.user.displayName,
+                              correo: authResult.user.email,
+                              photoUrl: authResult.user.photoUrl,
+                              telefono: authResult.user.phoneNumber
+
+                            //                          dateCreate: ServerValue.timestamp
+                          );
+                          if(authResult.additionalUserInfo.isNewUser){
+
+                            blocUser.saveUser(user);
+                          }else{
+                            user.isNew = false;
+
+                            blocUser.lastLoginUser(user);
+
+                          }
+
+                          var count = 0;
+                          Navigator.popUntil(context, (route) {
+                            return count++ == 2;
+                          });
+//                          Navigator.popUntil(context, ModalRoute.withName('login'));
                         }).catchError((error){
                           print("error a lverificar el codigo ");
                           print(error);

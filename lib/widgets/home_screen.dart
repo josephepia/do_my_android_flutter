@@ -39,30 +39,32 @@ class _HomeState extends State<Home> {
       ),
     );
 
-    return Stack(
-      alignment: Alignment.topCenter,
-      children: [
+    return Scaffold(
+      body: SafeArea(
+        child: Stack(
+          alignment: Alignment.topCenter,
+          children: [
 //        MapFullScreen(),
-        MapCreatePedido(),
-        LogoMiniOne(),
-        StreamBuilder(
-          stream: blocPedidos.serviciosStream,
-          builder: (BuildContext context, AsyncSnapshot snapshop) {
-            switch (snapshop.connectionState) {
-              case ConnectionState.waiting:
-                return Center(child: CircularProgressIndicator());
-              case ConnectionState.none:
-                return Center(child: CircularProgressIndicator());
-              case ConnectionState.done:
-                print(
-                    "datos de snap done=> ${snapshop.data.snapshot.value.toString()}");
+            MapCreatePedido(),
+            LogoMiniOne(),
+            StreamBuilder(
+              stream: blocPedidos.serviciosStream,
+              builder: (BuildContext context, AsyncSnapshot snapshop) {
+                switch (snapshop.connectionState) {
+                  case ConnectionState.waiting:
+                    return Center(child: CircularProgressIndicator());
+                  case ConnectionState.none:
+                    return Center(child: CircularProgressIndicator());
+                  case ConnectionState.done:
+                    print(
+                        "datos de snap done=> ${snapshop.data.snapshot.value.toString()}");
 
-                return Contenido(context);
+                    return Contenido(context);
 
-              case ConnectionState.active:
-                print(
-                    "datos de snap  active=> ${snapshop.data.snapshot.value.toString()}");
-                return Contenido(context);
+                  case ConnectionState.active:
+                    print(
+                        "datos de snap  active=> ${snapshop.data.snapshot.value.toString()}");
+                    return Contenido(context);
 
 //                  Column(
 //                  children: [
@@ -73,12 +75,14 @@ class _HomeState extends State<Home> {
 //                  ],
 //                );
 
-              default:
-                return null;
-            }
-          },
-        )
-      ],
+                  default:
+                    return null;
+                }
+              },
+            )
+          ],
+        ),
+      ),
     );
   }
 

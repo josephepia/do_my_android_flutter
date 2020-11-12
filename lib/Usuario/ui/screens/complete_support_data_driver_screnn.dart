@@ -59,47 +59,12 @@ class _CompleteSupportDataDriverState extends State<CompleteSupportDataDriver> {
                           children: [
                             InkWell(
                               onTap: () async {
-//                            var userTemp = await userBloc.currentUser;
-//
-//                            final _picker = ImagePicker();
-//
-//                            final pickedFile = await _picker.getImage(
-//                              source: ImageSource.gallery,
-//                            );
-//
-//                            if (pickedFile != null) {
-//                              imagenPerfil = File(pickedFile.path);
-//                            }
-//
-//                            print("foto seleccionada");
-//
-//                            var exten =
-//                                imagenPerfil.path.split(".").last;
-//
-//                            userBloc
-//                                .uploadFile(
-//                                "imagenes/${userTemp.uid}/vehiculo.${exten}",
-//                                imagenPerfil)
-//                                .then((StorageUploadTask
-//                            storageUpload) {
-//                              storageUpload.onComplete.then(
-//                                      (StorageTaskSnapshot snapchot) {
-//                                    snapchot.ref
-//                                        .getDownloadURL()
-//                                        .then((urlImage) {
-//                                      widget.user.photoUrlCar = urlImage;
-//                                      userBloc.updateUser(
-//                                          user: widget.user);
-//
-////                                                setState(() {
-////
-////                                                });
-//                                    });
-//                                  });
-//                            }).catchError((onError) {
-//                              print(
-//                                  "error al subir iamgen ${onError.toString()}");
-//                            });
+                                print("clic en cambiar  foto ");
+                                final pathDestinationStorage = "imagenes/${widget.user.uid}/documentos/photoUrlCar.jpg";
+                                final refDestinationDatabase = "usuarios/${widget.user.uid}/photoUrlCar";
+                                Navigator.push(context,
+                                    MaterialPageRoute(builder: (context)=> CameraPreviewDomy(cameraController: widget.cameraController,user: widget.user, pathDestinationStorage: pathDestinationStorage, refDestinationDatabase: refDestinationDatabase,))
+                                );
                               },
                               child: Ink(
                                 height: 100.0,

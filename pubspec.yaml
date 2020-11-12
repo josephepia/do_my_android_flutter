@@ -33,6 +33,8 @@ dependencies:
   google_sign_in:
   firebase_storage: ^3.1.6
   firebase_database: ^3.1.6
+  #libreria para notificaciones push de firebase
+  firebase_messaging:
   #libreria para usar un provider que exporga a los Blocs, de forma global
   generic_bloc_provider: ^1.0.9
   #libreria para poder utilizar imagenes SVG

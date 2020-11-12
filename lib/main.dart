@@ -1,5 +1,6 @@
 import 'package:do_my/Pedido/bloc/bloc_pedido.dart';
 import 'package:do_my/Pedido/ui/screens/create_new_pedido_screen.dart';
+import 'package:do_my/Providers/push_notification_provider.dart';
 import 'package:do_my/Usuario/bloc/bloc_user.dart';
 import 'package:do_my/Usuario/ui/screens/complete_profile_driver_screen.dart';
 import 'package:do_my/Usuario/ui/screens/send_number_phone_screen.dart';
@@ -35,6 +36,19 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+
+    final pushProvider  = new PushNotificationProvider();
+    pushProvider.initNotifications();
+
+    pushProvider.messageStream.listen((argumento) {
+      print('argumento: $argumento ');
+    });
+  }
   @override
   Widget build(BuildContext context) {
     SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(

@@ -46,7 +46,7 @@ class _CompleteProfileClientState extends State<CompleteProfileClient> {
             children: [
               Container(
                 height: 90,
-                child: Image.asset("images/logo.png"),
+                child: Image.asset("images/logoPrimario.png"),
               ),
               SizedBox(
                 height: 50.0,

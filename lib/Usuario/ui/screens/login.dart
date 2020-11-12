@@ -236,8 +236,8 @@ class LoginContent extends StatelessWidget {
               BotonInicioFacebook(
                 alto: 40,ancho: 248,
                 text: "Facebook",
-                onPressed: (){
-                    userBloc.signOut();
+                onPressed: ()async {
+                   await  userBloc.signOut();
                   userBloc.signIn(providerAuth: ProviderAuth.facebook).then((authResult) {
                     print("datos de usuario");
                     print(authResult.toString());
@@ -279,7 +279,7 @@ class ButtonLoginPhone extends StatelessWidget {
     onPressed: (){
       print("apunto de llamar a la navegacion de pantalla");
 //      MaterialPageRoute(builder: (context) => SendNumberPhone());
-      Navigator.of(context).pushNamed('/phoneLogin');
+      Navigator.of(context).pushNamed('phoneLogin');
 
       print('se ejecuto el llamado de pantalla');
       },
